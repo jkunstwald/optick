@@ -30,8 +30,8 @@ if(NOT OPTICK_ENABLED)
 	message(STATUS "Optick is disabled")
 	# add dummy target as a replacement
 	add_library(OptickCore STATIC ${OPTICK_SRC})
-	target_include_directories(OptickCore PUBLIC "src")
-	target_compile_definitions(OptickCore PUBLIC USE_OPTICK=0)
+        target_include_directories(OptickCore PRIVATE "src")
+        target_compile_definitions(OptickCore PUBLIC USE_OPTICK=0)
 	return()
 endif()
 
@@ -45,8 +45,10 @@ option(OPTICK_BUILD_CONSOLE_SAMPLE "Build Optick console sample app" ${standalon
 # OptickCore
 add_library(OptickCore SHARED ${OPTICK_SRC})
 target_include_directories(OptickCore
-	PUBLIC
+        PRIVATE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        PUBLIC
+                "include/"
 )
 set_target_properties(OptickCore 
 	PROPERTIES 
@@ -57,12 +59,13 @@ target_compile_definitions(OptickCore PRIVATE OPTICK_EXPORTS=1)
 if(OPTICK_USE_VULKAN)
 	message(STATUS "Optick uses Vulkan")
 	find_package(Vulkan REQUIRED)
-	target_link_libraries(OptickCore PUBLIC Vulkan::Vulkan)
+        target_link_libraries(OptickCore PRIVATE Vulkan::Vulkan)
 else()
 	target_compile_definitions(OptickCore PRIVATE OPTICK_ENABLE_GPU_VULKAN=0)
 endif()
 if(OPTICK_USE_D3D12)
 	message(STATUS "Optick uses DirectX 12")
+        target_link_libraries(OptickCore PRIVATE "d3d12.lib" "dxgi.lib")
 else()
 	target_compile_definitions(OptickCore PRIVATE OPTICK_ENABLE_GPU_D3D12=0)
 endif()
